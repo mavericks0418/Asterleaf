@@ -56,7 +56,9 @@ async function addTask(): Promise<void> {
 			.insert({
 				user_id: session.user.id,
 				title,
+				notes: "",
 				due_date: newDueDate || null,
+				is_completed: false,
 				position: tasks.length,
 			})
 			.select("*")
@@ -164,11 +166,37 @@ function compareTasks(a: ScheduleTask, b: ScheduleTask): number {
 }
 
 function handleError(prefix: string, error: unknown): void {
-	const detail = error instanceof Error ? error.message : String(error);
-	setupRequired = /schedule_tasks|schema cache|PGRST205|42P01/i.test(detail);
-	errorMessage = setupRequired
-		? "任务数据表尚未创建，请先在 Supabase SQL Editor 执行 supabase/schedule_tasks.sql。"
-		: `${prefix}：${detail}`;
+	const detail = errorDetail(error);
+	const missingTable = /schedule_tasks|schema cache|PGRST205|42P01/i.test(
+		detail,
+	);
+	const permissionError =
+		/42501|row-level security|permission denied|policy|PGRST116/i.test(detail);
+	setupRequired = missingTable || permissionError;
+	if (missingTable) {
+		errorMessage =
+			"任务数据表尚未创建，请在 Supabase SQL Editor 执行 supabase/schedule_tasks.sql。";
+	} else if (permissionError) {
+		errorMessage =
+			"任务表的 RLS 权限未配置完整，请在 Supabase SQL Editor 重新执行 supabase/schedule_tasks.sql。";
+	} else {
+		errorMessage = `${prefix}：${detail}`;
+	}
+}
+
+function errorDetail(error: unknown): string {
+	if (error instanceof Error) return error.message;
+	if (!error || typeof error !== "object") return String(error);
+
+	const record = error as Record<string, unknown>;
+	return (
+		[record.code, record.message, record.details, record.hint]
+			.filter(
+				(value): value is string =>
+					typeof value === "string" && value.length > 0,
+			)
+			.join(" · ") || "未知数据库错误"
+	);
 }
 
 function formatDueDate(value: string | null): string {
@@ -208,7 +236,7 @@ function formatDueDate(value: string | null): string {
 		<div class:setup-warning={setupRequired} class="task-message" role="alert">
 			<Icon icon={setupRequired ? "material-symbols:database-outline" : "material-symbols:error-outline"} />
 			<span>{errorMessage}</span>
-			{#if !setupRequired}<button type="button" on:click={loadTasks}>重试</button>{/if}
+			<button type="button" on:click={loadTasks}>{setupRequired ? "重新检测" : "重试"}</button>
 		</div>
 	{/if}
 
@@ -261,6 +289,8 @@ function formatDueDate(value: string | null): string {
 	.quick-add label { display: grid; gap: 0.35rem; color: var(--schedule-muted); font-size: 0.72rem; font-weight: 700; }
 	.quick-add input, .task-editor input, .task-editor textarea { width: 100%; min-height: 2.75rem; padding: 0.65rem 0.75rem; border: 1px solid var(--schedule-line); border-radius: 0.72rem; background: color-mix(in oklch, var(--page-bg) 38%, var(--card-bg)); color: var(--schedule-ink); outline: none; }
 	.quick-add input:focus, .task-editor input:focus, .task-editor textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 18%, transparent); }
+	:global(:root.dark) .quick-add input[type="date"], :global(:root.dark) .task-editor input[type="date"] { color-scheme: dark; }
+	:global(:root.dark) .quick-add input[type="date"]::-webkit-calendar-picker-indicator, :global(:root.dark) .task-editor input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.78; filter: brightness(0) invert(1); }
 	.add-task-button { min-height: 2.75rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; padding: 0.65rem 0.9rem; border: 0; border-radius: 0.72rem; background: var(--primary); color: oklch(0.22 0.03 var(--hue)); font: inherit; font-size: 0.82rem; font-weight: 800; cursor: pointer; }
 	.add-task-button:disabled { opacity: 0.5; cursor: not-allowed; }
 	.task-message, .task-empty { display: flex; align-items: center; gap: 0.55rem; margin-top: 1rem; padding: 0.85rem; border-radius: 0.75rem; color: #d05b57; background: color-mix(in oklch, #c2413e 10%, transparent); font-size: 0.82rem; }

@@ -7,7 +7,7 @@
 ## 配置步骤
 
 1. 创建一个 Supabase 项目。
-2. 在 Supabase 的 SQL Editor 中依次执行 `supabase/schedule.sql`（定时日程）和 `supabase/schedule_tasks.sql`（非时段任务）。每个脚本只需成功执行一次。
+2. 在 Supabase 的 SQL Editor 中依次执行 `supabase/schedule.sql`（定时日程）和 `supabase/schedule_tasks.sql`（非时段任务）。首次配置时各执行一次；如果任务面板提示 RLS 权限不完整，可以安全地重新执行 `supabase/schedule_tasks.sql`。
 3. 在 Supabase 的 Authentication -> URL Configuration 中，将网站地址加入 Site URL 和 Redirect URLs，例如：
 
    `https://mavericks0418.github.io/Asterleaf/`

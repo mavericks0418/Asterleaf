@@ -41,14 +41,15 @@ onMount(() => {
 			locale: "zh-CN",
 			timezone: TIMEZONE,
 			firstDayOfWeek: 1,
-			dayBoundaries: { start: "00:00", end: "24:00" },
+			dayBoundaries: { start: "06:00", end: "24:00" },
 			weekOptions: {
-				gridHeight: 1440,
+				gridHeight: 1260,
 				gridStep: 30,
 				eventOverlap: true,
 			},
 			calendars: {
 				teal: calendarColors(
+					"teal",
 					"#159a8c",
 					"#d8f3ee",
 					"#0b4e48",
@@ -57,6 +58,7 @@ onMount(() => {
 					"#e8fffb",
 				),
 				violet: calendarColors(
+					"violet",
 					"#8067c8",
 					"#eee8ff",
 					"#443082",
@@ -65,6 +67,7 @@ onMount(() => {
 					"#f8f5ff",
 				),
 				amber: calendarColors(
+					"amber",
 					"#c98222",
 					"#fff0d2",
 					"#6a3e08",
@@ -73,6 +76,7 @@ onMount(() => {
 					"#fff8e9",
 				),
 				rose: calendarColors(
+					"rose",
 					"#c65c73",
 					"#ffe5eb",
 					"#75263a",
@@ -113,6 +117,7 @@ onMount(() => {
 });
 
 function calendarColors(
+	colorName: ScheduleColor,
 	lightMain: string,
 	lightContainer: string,
 	lightText: string,
@@ -121,7 +126,7 @@ function calendarColors(
 	darkText: string,
 ) {
 	return {
-		colorName: "custom",
+		colorName,
 		lightColors: {
 			main: lightMain,
 			container: lightContainer,
@@ -236,8 +241,8 @@ function syncTheme(): void {
 	}
 
 	:global(.calendar-shell:has(.sx__week-wrapper)) {
-		height: 1580px;
-		min-height: 1580px;
+		height: 1480px;
+		min-height: 1480px;
 	}
 
 	:global(.calendar-shell .sx__calendar) {
@@ -301,8 +306,8 @@ function syncTheme(): void {
 		}
 
 		:global(.calendar-shell:has(.sx__week-wrapper)) {
-			height: 1500px;
-			min-height: 1500px;
+			height: 1520px;
+			min-height: 1520px;
 		}
 	}
 

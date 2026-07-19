@@ -467,6 +467,8 @@ function readableError(prefix: string, error: unknown): string {
 	.auth-form label, .editor-form label { display: grid; gap: 0.45rem; color: var(--schedule-muted); font-size: 0.82rem; font-weight: 700; }
 	.auth-form input, .editor-form input, .editor-form textarea { width: 100%; border: 1px solid var(--line-divider); border-radius: 0.75rem; background: color-mix(in oklch, var(--page-bg) 38%, var(--card-bg)); color: var(--schedule-ink); padding: 0.72rem 0.8rem; outline: none; transition: border-color 150ms ease, box-shadow 150ms ease; }
 	.auth-form input:focus, .editor-form input:focus, .editor-form textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 18%, transparent); }
+	:global(:root.dark) .editor-form input[type="date"], :global(:root.dark) .editor-form input[type="time"] { color-scheme: dark; }
+	:global(:root.dark) .editor-form input[type="date"]::-webkit-calendar-picker-indicator, :global(:root.dark) .editor-form input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0.78; filter: brightness(0) invert(1); }
 	.primary-button, .plain-button, .icon-button, .text-button, .danger-button { border: 0; cursor: pointer; font: inherit; transition: transform 150ms ease, background 150ms ease, opacity 150ms ease; }
 	.primary-button:active, .plain-button:active, .icon-button:active, .danger-button:active { transform: translateY(1px) scale(0.98); }
 	.primary-button { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; min-height: 2.75rem; padding: 0.7rem 1rem; border-radius: 0.75rem; background: var(--primary); color: oklch(0.22 0.03 var(--hue)); font-weight: 800; }
