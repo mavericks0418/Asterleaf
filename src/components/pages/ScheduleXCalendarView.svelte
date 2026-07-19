@@ -8,6 +8,7 @@ import {
 	createViewMonthGrid,
 	createViewWeek,
 } from "@schedule-x/calendar";
+import { createCurrentTimePlugin } from "@schedule-x/current-time";
 import { createEventsServicePlugin } from "@schedule-x/events-service";
 import { ScheduleXCalendar } from "@schedule-x/svelte";
 import { onMount } from "svelte";
@@ -21,6 +22,7 @@ export let onCreate: (date: string, start: string) => void;
 
 const TIMEZONE = "Asia/Shanghai";
 const eventsService = createEventsServicePlugin();
+const currentTimePlugin = createCurrentTimePlugin({ fullWeekWidth: true });
 let calendarApp: CalendarApp | null = null;
 let themeObserver: MutationObserver | null = null;
 let calendarReady = false;
@@ -39,9 +41,9 @@ onMount(() => {
 			locale: "zh-CN",
 			timezone: TIMEZONE,
 			firstDayOfWeek: 1,
-			dayBoundaries: { start: "06:00", end: "24:00" },
+			dayBoundaries: { start: "00:00", end: "24:00" },
 			weekOptions: {
-				gridHeight: 1150,
+				gridHeight: 1440,
 				gridStep: 30,
 				eventOverlap: true,
 			},
@@ -90,7 +92,7 @@ onMount(() => {
 			},
 			events: events.map(toCalendarEvent),
 		},
-		[eventsService],
+		[eventsService, currentTimePlugin],
 	);
 	readyFrame = window.requestAnimationFrame(() => {
 		calendarReady = true;
@@ -213,8 +215,8 @@ function syncTheme(): void {
 		--sx-internal-color-text: var(--schedule-ink);
 		--sx-internal-color-light-gray: var(--schedule-soft);
 		--sx-border: 1px solid var(--schedule-line);
-		height: clamp(680px, 78vh, 980px);
-		min-height: 680px;
+		height: 780px;
+		min-height: 780px;
 		padding: 0 1rem 1rem;
 	}
 
@@ -231,6 +233,11 @@ function syncTheme(): void {
 		--sx-color-on-tertiary: #35265f;
 		--sx-color-tertiary-container: #4a3f70;
 		--sx-color-on-tertiary-container: #f8f5ff;
+	}
+
+	:global(.calendar-shell:has(.sx__week-wrapper)) {
+		height: 1580px;
+		min-height: 1580px;
 	}
 
 	:global(.calendar-shell .sx__calendar) {
@@ -251,6 +258,14 @@ function syncTheme(): void {
 		font-weight: 800;
 	}
 
+	:global(.calendar-shell .sx__current-time-indicator),
+	:global(.calendar-shell .sx__current-time-indicator-full-week) {
+		z-index: 4;
+		height: 2px;
+		background: #ff4d4f;
+		box-shadow: 0 0 8px rgb(255 77 79 / 0.35);
+	}
+
 	:global(.calendar-shell button:focus-visible) {
 		outline: 2px solid var(--primary);
 		outline-offset: 2px;
@@ -261,7 +276,7 @@ function syncTheme(): void {
 		grid-template-columns: repeat(4, 1fr);
 		gap: 1px;
 		height: 100%;
-		min-height: 680px;
+		min-height: 780px;
 		border: 1px solid var(--schedule-line);
 		border-radius: 0.9rem;
 		overflow: hidden;
@@ -283,6 +298,11 @@ function syncTheme(): void {
 			height: 720px;
 			min-height: 720px;
 			padding: 0 0.65rem 0.65rem;
+		}
+
+		:global(.calendar-shell:has(.sx__week-wrapper)) {
+			height: 1500px;
+			min-height: 1500px;
 		}
 	}
 

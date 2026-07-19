@@ -22,3 +22,14 @@ export type ScheduleEventDraft = {
 	end_time: string;
 	color: ScheduleColor;
 };
+export type ScheduleTask = {
+	id: string;
+	user_id: string;
+	title: string;
+	notes: string;
+	due_date: string | null;
+	is_completed: boolean;
+	position: number;
+	created_at?: string;
+	updated_at?: string;
+};

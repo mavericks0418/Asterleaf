@@ -1,5 +1,6 @@
 <script lang="ts">
 import Icon from "@components/common/Icon.svelte";
+import ScheduleTaskBoard from "@components/pages/ScheduleTaskBoard.svelte";
 import ScheduleXCalendarView from "@components/pages/ScheduleXCalendarView.svelte";
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseClient } from "@utils/supabase";
@@ -112,6 +113,35 @@ function openEditor(event: ScheduleEvent): void {
 function closeEditor(): void {
 	editorOpen = false;
 	errorMessage = "";
+}
+
+function shiftDraft(minutes: number): void {
+	const duration =
+		timeToMinutes(draft.end_time) - timeToMinutes(draft.start_time);
+	const nextStart = Math.max(
+		0,
+		Math.min(1439 - duration, timeToMinutes(draft.start_time) + minutes),
+	);
+	draft.start_time = minutesToTime(nextStart);
+	draft.end_time = minutesToTime(nextStart + duration);
+}
+
+function resizeDraft(minutes: number): void {
+	const start = timeToMinutes(draft.start_time);
+	const nextEnd = Math.max(
+		start + 15,
+		Math.min(1439, timeToMinutes(draft.end_time) + minutes),
+	);
+	draft.end_time = minutesToTime(nextEnd);
+}
+
+function timeToMinutes(value: string): number {
+	const [hour = 0, minute = 0] = value.split(":").map(Number);
+	return hour * 60 + minute;
+}
+
+function minutesToTime(value: number): string {
+	return `${String(Math.floor(value / 60)).padStart(2, "0")}:${String(value % 60).padStart(2, "0")}`;
 }
 
 async function loadEvents(activeSession = session): Promise<void> {
@@ -357,7 +387,7 @@ function readableError(prefix: string, error: unknown): string {
 				<div>
 					<div class="eyebrow"><Icon icon="material-symbols:calendar-month-outline-rounded" /> SCHEDULE-X PLANNER</div>
 					<h1>我的日程</h1>
-					<p class="board-subtitle">点击日程进行修改；双击空白时间可快速新建。</p>
+					<p class="board-subtitle">点击日程进行修改；双击空白时间可快速新建。红线代表当前时间。</p>
 				</div>
 				<div class="account-actions">
 					<span class:loading={isLoading} class="sync-status"><span></span>{isLoading ? "同步中" : `${events.length} 项已同步`}</span>
@@ -373,11 +403,12 @@ function readableError(prefix: string, error: unknown): string {
 
 			<ScheduleXCalendarView {events} onEdit={openEditor} onCreate={openNewEditor} />
 		</section>
+		<ScheduleTaskBoard {supabase} {session} />
 	{/if}
 </div>
 
 {#if editorOpen}
-	<div class="modal-backdrop" role="presentation" on:click={(event) => { if (event.target === event.currentTarget) closeEditor(); }}>
+	<div class="schedule-board modal-scope"><div class="modal-backdrop" role="presentation" on:click={(event) => { if (event.target === event.currentTarget) closeEditor(); }}>
 		<div class="editor-modal" role="dialog" aria-modal="true" aria-labelledby="schedule-editor-title">
 			<div class="modal-heading">
 				<div><div class="eyebrow">{draft.id ? "EDIT EVENT" : "NEW EVENT"}</div><h2 id="schedule-editor-title">{draft.id ? "修改日程" : "添加日程"}</h2></div>
@@ -391,6 +422,11 @@ function readableError(prefix: string, error: unknown): string {
 					<label><span>开始</span><input type="time" bind:value={draft.start_time} required /></label>
 					<label><span>结束</span><input type="time" bind:value={draft.end_time} required /></label>
 				</div>
+				<div class="time-adjustment" aria-label="快速调整时间">
+					<span>快速调整</span>
+					<div><button type="button" on:click={() => shiftDraft(-30)}>提前 30 分</button><button type="button" on:click={() => shiftDraft(30)}>延后 30 分</button><button type="button" on:click={() => resizeDraft(-30)}>缩短 30 分</button><button type="button" on:click={() => resizeDraft(30)}>延长 30 分</button></div>
+					<small>Schedule-X 免费版不含拖拽与拉伸插件，可在这里或时间输入框中调整。</small>
+				</div>
 				<label class="full-field"><span>备注 <em>可选</em></span><textarea bind:value={draft.description} maxlength="2000" rows="3" placeholder="补充地点、链接或提醒"></textarea></label>
 				{#if errorMessage}<p class="form-error">{errorMessage}</p>{/if}
 				<div class="modal-actions">
@@ -399,7 +435,7 @@ function readableError(prefix: string, error: unknown): string {
 				</div>
 			</form>
 		</div>
-	</div>
+	</div></div>
 {/if}
 
 <style>
@@ -455,6 +491,7 @@ function readableError(prefix: string, error: unknown): string {
 	.plain-button:hover { background: var(--btn-regular-bg); color: var(--schedule-ink); }
 	.inline-message { display: flex; align-items: center; gap: 0.45rem; margin: 0 1rem 0.8rem; padding: 0.7rem 0.8rem; border-radius: 0.65rem; background: var(--schedule-soft); }
 	.inline-message.form-error { background: color-mix(in oklch, #c2413e 10%, transparent); }
+	.modal-scope { position: relative; z-index: 100; }
 	.modal-backdrop { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; padding: 1rem; background: color-mix(in oklch, #0b1020 48%, transparent); backdrop-filter: blur(5px); }
 	.editor-modal { width: min(100%, 540px); max-height: min(90dvh, 700px); overflow: auto; padding: 1.35rem; border: 1px solid var(--line-divider); border-radius: var(--radius-large); background: var(--card-bg); color: var(--schedule-ink); box-shadow: 0 24px 80px color-mix(in oklch, #000 28%, transparent); }
 	.modal-heading { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.25rem; }
@@ -469,6 +506,12 @@ function readableError(prefix: string, error: unknown): string {
 	.color-dot { width: 1.35rem; height: 1.35rem; border: 3px solid transparent; border-radius: 50%; cursor: pointer; outline: 2px solid transparent; outline-offset: 2px; }
 	.color-dot.chosen { outline-color: var(--schedule-ink); }
 	.color-teal { background: #159a8c; } .color-violet { background: #8067c8; } .color-amber { background: #d28a2e; } .color-rose { background: #c65c73; }
+	.time-adjustment { display: grid; gap: 0.45rem; }
+	.time-adjustment > span { color: var(--schedule-muted); font-size: 0.82rem; font-weight: 700; }
+	.time-adjustment > div { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.4rem; }
+	.time-adjustment button { min-height: 2.3rem; border: 1px solid var(--schedule-line); border-radius: 0.6rem; background: var(--schedule-soft); color: var(--schedule-ink); font: inherit; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
+	.time-adjustment button:hover { border-color: var(--primary); }
+	.time-adjustment small { color: var(--schedule-muted); font-size: 0.7rem; line-height: 1.5; }
 	.modal-actions, .modal-main-actions { display: flex; align-items: center; gap: 0.5rem; }
 	.modal-actions { justify-content: space-between; gap: 1rem; margin-top: 0.25rem; }
 	.danger-button { padding: 0.55rem 0.7rem; border-radius: 0.65rem; background: transparent; color: #d05b57; font-size: 0.8rem; font-weight: 800; }
@@ -487,6 +530,7 @@ function readableError(prefix: string, error: unknown): string {
 		.full-field { grid-column: auto; }
 		.modal-actions { align-items: stretch; flex-direction: column-reverse; }
 		.modal-main-actions, .modal-main-actions button, .danger-button { width: 100%; }
+		.time-adjustment > div { grid-template-columns: repeat(2, 1fr); }
 	}
 	@media (prefers-reduced-motion: reduce) {
 		.primary-button, .plain-button, .icon-button, .sync-status.loading span { transition: none; animation: none; }

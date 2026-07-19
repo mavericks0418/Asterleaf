@@ -39,6 +39,7 @@
     "@napi-rs/wasm-runtime": "^1.1.6",
     "@preact/signals": "^2.9.4",
     "@schedule-x/calendar": "^3.7.3",
+    "@schedule-x/current-time": "^3.7.3",
     "@schedule-x/events-service": "^3.7.3",
     "@schedule-x/svelte": "^3.0.0",
     "@schedule-x/theme-default": "^3.7.3",

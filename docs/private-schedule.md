@@ -7,7 +7,7 @@
 ## 配置步骤
 
 1. 创建一个 Supabase 项目。
-2. 在 Supabase 的 SQL Editor 中执行 `supabase/schedule.sql`。
+2. 在 Supabase 的 SQL Editor 中依次执行 `supabase/schedule.sql`（定时日程）和 `supabase/schedule_tasks.sql`（非时段任务）。每个脚本只需成功执行一次。
 3. 在 Supabase 的 Authentication -> URL Configuration 中，将网站地址加入 Site URL 和 Redirect URLs，例如：
 
    `https://mavericks0418.github.io/Asterleaf/`
@@ -25,3 +25,10 @@
 ## 隐私说明
 
 Supabase 的 anon key 可以出现在浏览器端，不能把 service role key 放进 `.env` 或前端代码。真正的权限由 `supabase/schedule.sql` 中的 RLS 策略保证：每条记录必须属于当前登录用户，其他账号无法读取、插入、修改或删除。
+
+`schedule_events` 和 `schedule_tasks` 都启用了同样的用户级 RLS。可以在 Supabase 的 Table Editor 中分别打开这两张表查看记录，也可以在 SQL Editor 中执行：
+
+```sql
+select * from public.schedule_events order by event_date, start_time;
+select * from public.schedule_tasks order by is_completed, position, created_at;
+```
