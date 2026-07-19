@@ -11,7 +11,8 @@ permissions:
   pages: write
   id-token: write
 
-# 确保只有一个部署任务同时运�?concurrency:
+# Ensure only one Pages deployment runs at a time
+concurrency:
   group: "pages"
   cancel-in-progress: false
 
