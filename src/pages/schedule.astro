@@ -1,0 +1,11 @@
+---
+import ScheduleBoard from "@components/pages/ScheduleBoard.svelte";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+
+const title = "我的日程";
+const description = "只对已登录的你开放的个人时间表。";
+---
+
+<MainGridLayout title={title} description={description}>
+	<ScheduleBoard client:load />
+</MainGridLayout>

@@ -37,6 +37,7 @@
     "@iconify-json/simple-icons": "^1.2.89",
     "@iconify/utils": "^3.1.4",
     "@napi-rs/wasm-runtime": "^1.1.6",
+    "@supabase/supabase-js": "^2.110.7",
     "@swup/astro": "^1.8.0",
     "@tailwindcss/typography": "^0.5.20",
     "@types/hast": "^3.0.4",
