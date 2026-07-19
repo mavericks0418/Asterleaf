@@ -523,15 +523,22 @@ return `${first.getFullYear()}-${String(firstMonth).padStart(2, "0")}-${String(f
 
 <style>
 	.schedule-board {
-		--schedule-ink: var(--deep-text);
-		--schedule-muted: color-mix(in oklch, var(--schedule-ink) 55%, transparent);
-		--schedule-line: color-mix(in oklch, var(--schedule-ink) 10%, transparent);
+		--schedule-ink: oklch(0.28 0.02 var(--hue));
+		--schedule-muted: oklch(0.53 0.02 var(--hue));
+		--schedule-line: rgb(0 0 0 / 0.11);
 		--schedule-soft: color-mix(in oklch, var(--primary) 9%, var(--card-bg));
 		color: var(--schedule-ink);
 	}
 
+	:global(:root.dark) .schedule-board {
+		--schedule-ink: oklch(0.92 0.018 var(--hue));
+		--schedule-muted: oklch(0.76 0.025 var(--hue));
+		--schedule-line: rgb(255 255 255 / 0.13);
+		--schedule-soft: color-mix(in oklch, var(--primary) 13%, var(--card-bg));
+	}
+
 	.schedule-card {
-		background: color-mix(in oklch, var(--card-bg) 92%, transparent);
+		background: var(--card-bg);
 		border: 1px solid var(--line-divider);
 		border-radius: var(--radius-large);
 		box-shadow: 0 18px 60px color-mix(in oklch, var(--schedule-ink) 8%, transparent);
@@ -614,7 +621,7 @@ return `${first.getFullYear()}-${String(firstMonth).padStart(2, "0")}-${String(f
 	.text-button:hover { text-decoration: underline; }
 	.form-error, .form-success { margin: 0; font-size: 0.82rem; line-height: 1.5; }
 	.form-error { color: #c2413e; }
-	.form-success { color: #168267; }
+	.form-success { color: var(--primary); }
 
 	.board-card { overflow: hidden; }
 	.board-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: clamp(1.25rem, 3vw, 2rem) clamp(1.25rem, 3vw, 2.5rem) 1.2rem; }
