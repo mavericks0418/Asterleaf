@@ -53,6 +53,9 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 
 			// 番组计划
 			LinkPresets.Bangumi,
+
+			// 我的日程
+			LinkPresets.Schedule,
 		],
 	});
 
@@ -185,6 +188,11 @@ export const LinkPresets: Record<string, NavBarLink> = {
 		url: "/anime/",
 		icon: "material-symbols:live-tv",
 		pageKey: "anime",
+	},
+	Schedule: {
+		name: "我的日程",
+		url: "/schedule/",
+		icon: "material-symbols:calendar-month-rounded",
 	},
 };
 

@@ -55,7 +55,7 @@ onMount(() => {
 					"#0b4e48",
 					"#153f3a",
 					"#9be4d8",
-					"#e8fffb",
+					"#0b4e48",
 				),
 				violet: calendarColors(
 					"violet",
@@ -64,7 +64,7 @@ onMount(() => {
 					"#443082",
 					"#4a3f70",
 					"#cfc3ff",
-					"#f8f5ff",
+					"#332263",
 				),
 				amber: calendarColors(
 					"amber",
@@ -73,7 +73,7 @@ onMount(() => {
 					"#6a3e08",
 					"#62451e",
 					"#f0ca82",
-					"#fff8e9",
+					"#5a3508",
 				),
 				rose: calendarColors(
 					"rose",
@@ -82,7 +82,7 @@ onMount(() => {
 					"#75263a",
 					"#6d3442",
 					"#efb0bd",
-					"#fff2f5",
+					"#642236",
 				),
 			},
 			callbacks: {
