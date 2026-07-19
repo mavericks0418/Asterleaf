@@ -257,26 +257,65 @@ return `${first.getFullYear()}-${String(firstMonth).padStart(2, "0")}-${String(f
 		isLoading = false;
 	}
 
+	function getAuthRedirectUrl(): string {
+		const baseUrl = import.meta.env.BASE_URL.endsWith("/")
+			? import.meta.env.BASE_URL
+			: `${import.meta.env.BASE_URL}/`;
+		return new URL(`${baseUrl}schedule/`, window.location.origin).toString();
+	}
+
 	async function submitAuth(): Promise<void> {
 		if (!supabase) return;
 		authMessage = "";
 		errorMessage = "";
 		isLoading = true;
 
-		const result = authMode === "sign-in"
-			? await supabase.auth.signInWith密码({ email, password })
-			: await supabase.auth.signUp({ email, password });
+		try {
+			const result = authMode === "sign-in"
+				? await supabase.auth.signInWithPassword({ email, password })
+				: await supabase.auth.signUp({
+					email,
+					password,
+					options: { emailRedirectTo: getAuthRedirectUrl() },
+				});
 
-		if (result.error) {
-			errorMessage = result.error.message;
-		} else if (authMode === "sign-up" && !result.data.session) {
-			authMessage = "注册成功，请先完成邮箱确认。";
-		} else {
-			authMessage = "登录成功。";
+			if (result.error) {
+				errorMessage = result.error.message;
+			} else if (authMode === "sign-up" && !result.data.session) {
+				authMessage = "注册成功，请先完成邮箱确认。";
+			} else {
+				authMessage = "登录成功。";
+			}
+		} catch (error) {
+			errorMessage = error instanceof Error ? error.message : "操作失败，请稍后重试。";
+		} finally {
+			isLoading = false;
 		}
-		isLoading = false;
 	}
 
+	async function resendConfirmation(): Promise<void> {
+		if (!supabase || !email) return;
+		authMessage = "";
+		errorMessage = "";
+		isLoading = true;
+
+		try {
+			const { error } = await supabase.auth.resend({
+				type: "signup",
+				email,
+				options: { emailRedirectTo: getAuthRedirectUrl() },
+			});
+			if (error) {
+				errorMessage = error.message;
+			} else {
+				authMessage = "确认邮件已重新发送，请检查收件箱与垃圾邮件。";
+			}
+		} catch (error) {
+			errorMessage = error instanceof Error ? error.message : "邮件发送失败，请稍后重试。";
+		} finally {
+			isLoading = false;
+		}
+	}
 	async function signOut(): Promise<void> {
 		if (!supabase) return;
 		await supabase.auth.signOut();
@@ -367,6 +406,9 @@ return `${first.getFullYear()}-${String(firstMonth).padStart(2, "0")}-${String(f
 				</label>
 				{#if errorMessage}<p class="form-error">{errorMessage}</p>{/if}
 				{#if authMessage}<p class="form-success">{authMessage}</p>{/if}
+				{#if authMode === "sign-up" && authMessage}
+					<button class="text-button" type="button" on:click={resendConfirmation} disabled={isLoading}>重新发送确认邮件</button>
+				{/if}
 				<button class="primary-button" type="submit" disabled={isLoading}>
 					{isLoading ? "处理中…" : authMode === "sign-in" ? "登录日程" : "创建账号"}
 				</button>
